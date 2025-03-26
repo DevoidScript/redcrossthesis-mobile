@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Image, Alert } from "react-native";
 import { supabase } from "../library/db_conn"; // Ensure this is correctly set up
 
 const DashboardScreen = ({ navigation }) => {
@@ -13,15 +13,34 @@ const DashboardScreen = ({ navigation }) => {
   };
 
   const handleDonateBlood = () => {
-    navigation.navigate("DonorForm"); // Ensure DonateBloodScreen is defined in navigation
+    navigation.navigate("DonorForm"); // Ensure DonorForm is defined in navigation
+  };
+
+  const handleProfile = () => {
+    navigation.navigate("Profile"); // Navigate to Profile Screen
   };
 
   return (
     <View style={styles.container}>
+      {/* Clickable Profile Image */}
+      <TouchableOpacity onPress={handleProfile} style={styles.profileContainer}>
+        <Image
+          source={require("../../assets/profile_icon.png")} // Ensure correct path
+          style={styles.profileImage}
+          resizeMode="cover" // Ensures the image scales correctly
+        />
+      </TouchableOpacity>
+
       <Text style={styles.title}>Welcome to the Donor Dashboard!</Text>
-      
-      <TouchableOpacity style={styles.donateButton} onPress={handleDonateBlood}>
-        <Text style={styles.donateButtonText}>Donate Blood</Text>
+
+      {/* Donate Button with Image and Text */}
+      <TouchableOpacity style={styles.donateContainer} onPress={handleDonateBlood}>
+        <Image
+          source={require("../../assets/donate_icon.png")} // Ensure correct path
+          style={styles.donateIcon}
+          resizeMode="cover"
+        />
+        <Text style={styles.donateText}>Donate</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
@@ -38,27 +57,53 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#fff",
   },
+  profileContainer: {
+    position: "absolute",
+    top: 50,
+    left: 20,
+  },
+  profileImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 50, // Ensure it's a perfect circle
+    borderWidth: 2,
+    borderColor: "#007bff",
+  },
   title: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "bold",
     marginBottom: 20,
+    position: "absolute",
+    top: 125,
   },
-  donateButton: {
-    backgroundColor: "green",
+  donateContainer: {
+    flexDirection: "row", // Aligns image and text horizontally
+    alignItems: "center", // Centers items vertically
+    backgroundColor: "red",
     padding: 15,
     borderRadius: 5,
-    marginTop: 20,
+    marginBottom: 10,
   },
-  donateButtonText: {
-    color: "#fff",
-    fontSize: 16,
+  donateIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20, // Circular icon
+    borderWidth: 2,
+    borderColor: "#fff",
+  },
+  donateText: {
+    color: "white",
+    fontSize: 24,
     fontWeight: "bold",
+    marginLeft: 10, // Spacing between image and text
   },
   logoutButton: {
     backgroundColor: "red",
     padding: 15,
     borderRadius: 5,
-    marginTop: 20,
+    position: "absolute",
+    top: 50,
+    right: 20,
   },
   logoutButtonText: {
     color: "#fff",
