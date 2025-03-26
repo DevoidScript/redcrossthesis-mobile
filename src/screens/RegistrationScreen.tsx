@@ -14,6 +14,7 @@ const RegistrationScreen: React.FC = () => {
   const [middleName, setMiddleName] = useState('');
   const [birthdate, setBirthdate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [age, setAge] = useState('');
   const [sex, setSex] = useState('Select Sex');
   const [civilStatus, setCivilStatus] = useState('Select Civil Status');
   const [permanentAddress, setPermanentAddress] = useState('');
@@ -72,6 +73,7 @@ const RegistrationScreen: React.FC = () => {
           first_name: firstName,
           middle_name: middleName,
           birthdate,
+          age,
           sex,
           civil_status: civilStatus,
           permanent_address: permanentAddress,
@@ -80,8 +82,8 @@ const RegistrationScreen: React.FC = () => {
           religion,
           education,
           occupation,
-          mobile_no: mobileNo,
-          telephone_no: telephoneNo,
+          mobile: mobileNo,
+          telephone: telephoneNo,
           email,
         }
       ]);
@@ -149,7 +151,7 @@ const RegistrationScreen: React.FC = () => {
             }}
           />
         )}
-
+        <TextInput placeholder="Age" style={styles.input} value={age} onChangeText={setAge} />
         <Text style={styles.label}>Sex:</Text>
         <Picker selectedValue={sex} onValueChange={setSex} style={styles.input}>
           <Picker.Item label="Select Sex" value="Select Sex" />
@@ -203,6 +205,13 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
   },
+
+  label: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginTop: 10,
+  },
+
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',

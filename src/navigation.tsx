@@ -3,7 +3,8 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
 import LoginScreen from "./screens/LoginScreen";
 import RegistrationScreen from "./screens/RegistrationScreen";
-import DashboardScreen from "./screens/DashboardScreen"; // Import the Dashboard
+import DashboardScreen from "./screens/DashboardScreen"; 
+import DonorFormScreen from "./screens/DonorFormScreen"; // Import the Donor Interview Form
 
 const Stack = createNativeStackNavigator();
 
@@ -16,7 +17,12 @@ const AppNavigator = () => {
         <Stack.Screen 
           name="Dashboard" 
           component={DashboardScreen} 
-          options={{ headerShown: false }} // Hide header for a clean dashboard look
+          options={{ headerShown: false }} 
+        />
+        <Stack.Screen 
+          name="DonorForm" 
+          component={DonorFormScreen} 
+          options={{ title: "Blood Donor Interview" }} 
         />
       </Stack.Navigator>
     </NavigationContainer>

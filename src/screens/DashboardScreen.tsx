@@ -12,9 +12,18 @@ const DashboardScreen = ({ navigation }) => {
     navigation.replace("Login"); // Redirect to Login after logout
   };
 
+  const handleDonateBlood = () => {
+    navigation.navigate("DonorForm"); // Ensure DonateBloodScreen is defined in navigation
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Welcome to the Donor Dashboard!</Text>
+      
+      <TouchableOpacity style={styles.donateButton} onPress={handleDonateBlood}>
+        <Text style={styles.donateButtonText}>Donate Blood</Text>
+      </TouchableOpacity>
+
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Text style={styles.logoutButtonText}>Logout</Text>
       </TouchableOpacity>
@@ -33,6 +42,17 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     marginBottom: 20,
+  },
+  donateButton: {
+    backgroundColor: "green",
+    padding: 15,
+    borderRadius: 5,
+    marginTop: 20,
+  },
+  donateButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
   },
   logoutButton: {
     backgroundColor: "red",
