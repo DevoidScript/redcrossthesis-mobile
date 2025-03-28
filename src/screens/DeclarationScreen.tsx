@@ -29,6 +29,9 @@ const DeclarationScreen = () => {
   const [showSignaturePad, setShowSignaturePad] = useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   
+  // Create a ref for the signature pad
+  const signatureRef = useRef(null);
+  
   // @ts-ignore - Get donor data from navigation params
   const { donorData } = route.params;
 
@@ -46,13 +49,13 @@ const DeclarationScreen = () => {
   };
 
   // Handle signature image upload
-  const handleUploadSignature = async (type) => {
+  const handleUploadSignature = async (type: 'donor' | 'guardian') => {
     const hasPermission = await requestPermissions();
     if (!hasPermission) return;
 
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: 'images',
         allowsEditing: true,
         aspect: [4, 1],
         quality: 1,
@@ -73,19 +76,33 @@ const DeclarationScreen = () => {
   };
 
   // Handle signature drawing
-  const handleSignatureDrawing = (type) => {
+  const handleSignatureDrawing = (type: 'donor' | 'guardian') => {
     setSignatureType(type);
     setShowSignaturePad(true);
   };
 
   // Handle saving the drawn signature
-  const handleSignature = (signature) => {
+  const handleSignature = (signature: string) => {
     setShowSignaturePad(false);
     
     if (signatureType === 'donor') {
       setDonorSignature(signature);
     } else {
       setGuardianSignature(signature);
+    }
+  };
+
+  // Function to save the signature
+  const saveSignature = () => {
+    if (signatureRef.current) {
+      signatureRef.current.readSignature();
+    }
+  };
+
+  // Function to clear the signature pad
+  const clearSignaturePad = () => {
+    if (signatureRef.current) {
+      signatureRef.current.clearSignature();
     }
   };
 
@@ -99,7 +116,7 @@ const DeclarationScreen = () => {
     body {margin: 0; padding: 0}`;
 
   // Clear signature
-  const clearSignature = (type) => {
+  const clearSignature = (type: 'donor' | 'guardian') => {
     if (type === 'donor') {
       setDonorSignature('');
     } else {
@@ -167,7 +184,7 @@ const DeclarationScreen = () => {
           }
         }]
       );
-    } catch (error) {
+    } catch (error: any) {
       console.error("Unexpected Error:", error);
       Alert.alert('Error', error?.message || 'An unexpected error occurred');
     } finally {
@@ -345,13 +362,32 @@ const DeclarationScreen = () => {
             
             <View style={styles.signaturePadContainer}>
               <SignatureScreen
+                ref={signatureRef}
                 onOK={(signature) => handleSignature(signature)}
                 onEmpty={() => Alert.alert('Error', 'Please provide a signature')}
                 clearText="Clear"
                 confirmText="Save"
                 descriptionText={signatureType === 'donor' ? "Donor's Signature" : "Guardian's Signature"}
                 webStyle={style}
+                autoClear={false}
+                imageType="image/png"
               />
+            </View>
+            
+            <View style={styles.signatureButtonsContainer}>
+              <TouchableOpacity 
+                style={[styles.signatureButton, styles.clearSignatureButton]}
+                onPress={clearSignaturePad}
+              >
+                <Text style={styles.clearButtonText}>Clear</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={[styles.signatureButton, styles.saveSignatureButton]}
+                onPress={saveSignature}
+              >
+                <Text style={styles.saveButtonText}>Save</Text>
+              </TouchableOpacity>
             </View>
             
             <TouchableOpacity 
@@ -608,6 +644,32 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  signatureButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    minWidth: 100,
+    alignItems: 'center',
+    marginHorizontal: 10,
+  },
+  clearSignatureButton: {
+    backgroundColor: '#f2f2f2',
+    borderWidth: 1,
+    borderColor: '#ccc',
+  },
+  saveSignatureButton: {
+    backgroundColor: '#d32f2f',
+  },
+  saveButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  signatureButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginBottom: 20,
   },
 });
 
