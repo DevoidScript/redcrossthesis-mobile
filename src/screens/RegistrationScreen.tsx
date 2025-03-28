@@ -28,6 +28,14 @@ const RegistrationScreen: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  
+  // Add state for identification fields
+  const [idSchool, setIdSchool] = useState('');
+  const [idCompany, setIdCompany] = useState('');
+  const [idPrc, setIdPrc] = useState('');
+  const [idDrivers, setIdDrivers] = useState('');
+  const [idSssGsisBir, setIdSssGsisBir] = useState('');
+  const [idOthers, setIdOthers] = useState('');
 
   const validateForm = () => {
     if (!surname || !firstName || sex === 'Select Sex' || civilStatus === 'Select Civil Status' || !birthdate || !permanentAddress || !nationality || !occupation || !mobileNo || !email || !password || !confirmPassword) {
@@ -85,6 +93,13 @@ const RegistrationScreen: React.FC = () => {
           mobile: mobileNo,
           telephone: telephoneNo,
           email,
+          // Add identification fields
+          id_school: idSchool,
+          id_company: idCompany,
+          id_prc: idPrc,
+          id_drivers: idDrivers,
+          id_sss_gsis_bir: idSssGsisBir,
+          id_others: idOthers,
         }
       ]);
   
@@ -117,6 +132,14 @@ const RegistrationScreen: React.FC = () => {
       setTelephoneNo('');
       setPassword('');
       setConfirmPassword('');
+      
+      // Clear identification fields
+      setIdSchool('');
+      setIdCompany('');
+      setIdPrc('');
+      setIdDrivers('');
+      setIdSssGsisBir('');
+      setIdOthers('');
   
     } catch (error) {
       console.log("Unexpected Error:", error);
@@ -180,6 +203,64 @@ const RegistrationScreen: React.FC = () => {
         <TextInput placeholder="Mobile No. *" style={styles.input} value={mobileNo} onChangeText={setMobileNo} />
         <TextInput placeholder="Telephone No. (Optional)" style={styles.input} value={telephoneNo} onChangeText={setTelephoneNo} />
 
+        <Text style={styles.sectionTitle}>IDENTIFICATION NUMBERS</Text>
+        <View style={styles.idContainer}>
+          <View style={styles.idItem}>
+            <Text style={styles.idLabel}>School</Text>
+            <TextInput 
+              placeholder="School ID" 
+              style={styles.input} 
+              value={idSchool} 
+              onChangeText={setIdSchool} 
+            />
+          </View>
+          <View style={styles.idItem}>
+            <Text style={styles.idLabel}>Company</Text>
+            <TextInput 
+              placeholder="Company ID" 
+              style={styles.input} 
+              value={idCompany} 
+              onChangeText={setIdCompany} 
+            />
+          </View>
+          <View style={styles.idItem}>
+            <Text style={styles.idLabel}>PRC</Text>
+            <TextInput 
+              placeholder="PRC ID" 
+              style={styles.input} 
+              value={idPrc} 
+              onChangeText={setIdPrc} 
+            />
+          </View>
+          <View style={styles.idItem}>
+            <Text style={styles.idLabel}>Driver's</Text>
+            <TextInput 
+              placeholder="Driver's License" 
+              style={styles.input} 
+              value={idDrivers} 
+              onChangeText={setIdDrivers} 
+            />
+          </View>
+          <View style={styles.idItem}>
+            <Text style={styles.idLabel}>SSS/GSIS/BIR</Text>
+            <TextInput 
+              placeholder="SSS/GSIS/BIR" 
+              style={styles.input} 
+              value={idSssGsisBir} 
+              onChangeText={setIdSssGsisBir} 
+            />
+          </View>
+          <View style={styles.idItem}>
+            <Text style={styles.idLabel}>Others</Text>
+            <TextInput 
+              placeholder="Other ID" 
+              style={styles.input} 
+              value={idOthers} 
+              onChangeText={setIdOthers} 
+            />
+          </View>
+        </View>
+
         <Text style={styles.sectionTitle}>ACCOUNT INFORMATION</Text>
         <TextInput placeholder="Email Address *" style={styles.input} value={email} onChangeText={setEmail} />
         <TextInput placeholder="Password *" style={styles.input} secureTextEntry value={password} onChangeText={setPassword} />
@@ -237,6 +318,20 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  idContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  idItem: {
+    width: '48%',
+    marginBottom: 10,
+  },
+  idLabel: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginBottom: 5,
   },
 });
 

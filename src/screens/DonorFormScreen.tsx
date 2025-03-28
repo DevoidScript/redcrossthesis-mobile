@@ -5,18 +5,37 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import moment from 'moment';
 import { supabase } from '../library/db_conn';
 import { useNavigation } from '@react-navigation/native';
+import type { DonorFormData } from '../types/donor';
 
 const DonorForm: React.FC = () => {
   const navigation = useNavigation();
   const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState('');
   
+  // Generate PRC Donor Number (Format: PRC-YYYY-XXXXX where X is random number)
+  const generatePrcDonorNumber = () => {
+    const year = new Date().getFullYear();
+    const randomNum = Math.floor(10000 + Math.random() * 90000); // 5-digit random number
+    return `PRC-${year}-${randomNum}`;
+  };
+
+  // Generate DOH NNBNETS Barcode (Format: DOH-YYYYMMDD-XXXXX where X is random number)
+  const generateDohBarcode = () => {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const randomNum = Math.floor(10000 + Math.random() * 90000); // 5-digit random number
+    return `DOH-${year}${month}${day}-${randomNum}`;
+  };
+
   // Form Fields
     const [surname, setSurname] = useState('');
     const [firstName, setFirstName] = useState('');
     const [middleName, setMiddleName] = useState('');
     const [birthdate, setBirthdate] = useState(new Date());
     const [showDatePicker, setShowDatePicker] = useState(false);
-     const [age, setAge] = useState('');
+    const [age, setAge] = useState('');
     const [sex, setSex] = useState('Select Sex');
     const [civilStatus, setCivilStatus] = useState('Select Civil Status');
     const [permanentAddress, setPermanentAddress] = useState('');
@@ -50,7 +69,7 @@ const DonorForm: React.FC = () => {
         setFirstName(data.first_name || '');
         setMiddleName(data.middle_name || '');
         setBirthdate(data.birthdate ? new Date(data.birthdate) : new Date());
-        setAge(data.age || '');
+        setAge(data.age?.toString() || '');
         setSex(data.sex || 'Select Sex');
         setCivilStatus(data.civil_status || 'Select Civil Status');
         setPermanentAddress(data.permanent_address || '');
@@ -62,6 +81,12 @@ const DonorForm: React.FC = () => {
         setMobile(data.mobile || '');
         setTelephone(data.telephone || '');
         setEmail(data.email || '');
+        setIdSchool(data.id_school || '');
+        setIdCompany(data.id_company || '');
+        setIdPrc(data.id_prc || '');
+        setIdDrivers(data.id_drivers || '');
+        setIdSssGsisBir(data.id_sss_gsis_bir || '');
+        setIdOthers(data.id_others || '');
       }
       setLoading(false);
     };
@@ -70,7 +95,7 @@ const DonorForm: React.FC = () => {
   }, []);
 
   const validateForm = () => {
-    if (!surname || !firstName || sex === 'Select Sex' || civilStatus === 'Select Civil Status' || !birthdate || !permanentAddress || !nationality || !occupation || !mobileNo || !email) {
+    if (!surname || !firstName || sex === 'Select Sex' || civilStatus === 'Select Civil Status' || !birthdate || !permanentAddress || !nationality || !occupation || !mobile || !email) {
       Alert.alert('Missing Information', 'Please fill in all required fields.');
       return false;
     }
@@ -81,53 +106,44 @@ const DonorForm: React.FC = () => {
     if (!validateForm()) return;
   
     try {
-      const { error } = await supabase.from('donor_form').insert([
-        {
-          prc_donor_number: '',  // Add logic to capture this
-          doh_nnbnets_barcode: '',  // Add logic to capture this
-          surname,
-          first_name: firstName,
-          middle_name: middleName,
-          birthdate,
-          age,
-          sex,
-          civil_status: civilStatus,
-          permanent_address: permanentAddress,
-          office_address: officeAddress,
-          nationality,
-          religion,
-          education,
-          occupation,
-          telephone,
-          mobile,
-          email,
-          id_school: '', // Capture from user input
-          id_company: '', // Capture from user input
-          id_prc: '', // Capture from user input
-          id_drivers: '', // Capture from user input
-          id_sss_gsis_bir: '', // Capture from user input
-          id_others: '', // Capture from user input
-          relationship: '', // Capture from user input
-          submitted_at: new Date().toISOString(),
-          donor_signature: '', // Capture from user input
-          guardian_signature: '', // Capture from user input
-        }
-      ]);
-  
-      if (error) {
-        console.log("Database Insertion Error:", error.message);
-        Alert.alert('Error', error.message);
-        return;
-      }
-  
-      Alert.alert('Success', 'Donor form submitted successfully!', [
-        { text: 'OK', onPress: () => navigation.navigate('Dashboard') },
-      ]);
-    } catch (error) {
-      console.log("Unexpected Error:", error);
-      Alert.alert('Unexpected Error', error.message);
+      const prcDonorNumber = generatePrcDonorNumber();
+      const dohBarcode = generateDohBarcode();
+
+      const donorData = {
+        prc_donor_number: prcDonorNumber,
+        doh_nnbnets_barcode: dohBarcode,
+        surname,
+        first_name: firstName,
+        middle_name: middleName || null,
+        birthdate: moment(birthdate).format('YYYY-MM-DD'),
+        age: parseInt(age),
+        sex,
+        civil_status: civilStatus,
+        permanent_address: permanentAddress,
+        office_address: officeAddress || null,
+        nationality: nationality || null,
+        religion: religion || null,
+        education: education || null,
+        occupation: occupation || null,
+        telephone: telephone || null,
+        mobile: mobile || null,
+        email: email || null,
+        id_school: idSchool || null,
+        id_company: idCompany || null,
+        id_prc: idPrc || null,
+        id_drivers: idDrivers || null,
+        id_sss_gsis_bir: idSssGsisBir || null,
+        id_others: idOthers || null
+      };
+
+      // @ts-ignore - Navigate to Declaration screen with donor data
+      navigation.navigate('Declaration', { donorData });
+      
+    } catch (error: any) {
+      console.error("Unexpected Error:", error);
+      Alert.alert('Unexpected Error', error?.message || 'An unexpected error occurred');
     }
-};
+  };
 
 
   if (loading) {
@@ -206,7 +222,7 @@ const DonorForm: React.FC = () => {
 
 
         <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-          <Text style={styles.submitButtonText}>Submit</Text>
+          <Text style={styles.submitButtonText}>Next</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
