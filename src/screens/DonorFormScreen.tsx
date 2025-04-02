@@ -5,13 +5,11 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import moment from 'moment';
 import { supabase } from '../library/db_conn';
 import { useNavigation } from '@react-navigation/native';
-import type { DonorFormData } from '../types/donor';
 
 const DonorForm: React.FC = () => {
   const navigation = useNavigation();
   const [loading, setLoading] = useState(true);
-  const [userId, setUserId] = useState('');
-  
+
   // Generate PRC Donor Number (Format: PRC-YYYY-XXXXX where X is random number)
   const generatePrcDonorNumber = () => {
     const year = new Date().getFullYear();
@@ -59,34 +57,57 @@ const DonorForm: React.FC = () => {
   useEffect(() => {
     const fetchDonorDetails = async () => {
       setLoading(true);
-      const { data, error } = await supabase.from('donors_detail').select('*').single();
+      try {
+        // Get the current authenticated user
+        const { data: authData } = await supabase.auth.getUser();
+        const userEmail = authData?.user?.email;
+        
+        if (userEmail) {
+          console.log('Fetching donor details for email:', userEmail);
+          
+          // Try to find a donor record with the matching email
+          const { data, error } = await supabase
+            .from('donors_detail')
+            .select('*')
+            .eq('email', userEmail)
+            .maybeSingle(); // Gets a single record or null if none exists
 
-      if (error) {
-        Alert.alert('Error', 'Failed to fetch donor details.');
-        console.error('Fetch error:', error);
-      } else if (data) {
-        setSurname(data.surname || '');
-        setFirstName(data.first_name || '');
-        setMiddleName(data.middle_name || '');
-        setBirthdate(data.birthdate ? new Date(data.birthdate) : new Date());
-        setAge(data.age?.toString() || '');
-        setSex(data.sex || 'Select Sex');
-        setCivilStatus(data.civil_status || 'Select Civil Status');
-        setPermanentAddress(data.permanent_address || '');
-        setOfficeAddress(data.office_address || '');
-        setNationality(data.nationality || '');
-        setReligion(data.religion || '');
-        setEducation(data.education || '');
-        setOccupation(data.occupation || '');
-        setMobile(data.mobile || '');
-        setTelephone(data.telephone || '');
-        setEmail(data.email || '');
-        setIdSchool(data.id_school || '');
-        setIdCompany(data.id_company || '');
-        setIdPrc(data.id_prc || '');
-        setIdDrivers(data.id_drivers || '');
-        setIdSssGsisBir(data.id_sss_gsis_bir || '');
-        setIdOthers(data.id_others || '');
+          if (error && error.code !== 'PGRST116') { // PGRST116 is the "no rows returned" error code
+            console.error('Fetch error:', error);
+            Alert.alert('Error', 'Failed to fetch donor details.');
+          } else if (data) {
+            console.log('Donor details found:', data);
+            setSurname(data.surname || '');
+            setFirstName(data.first_name || '');
+            setMiddleName(data.middle_name || '');
+            setBirthdate(data.birthdate ? new Date(data.birthdate) : new Date());
+            setAge(data.age?.toString() || '');
+            setSex(data.sex || 'Select Sex');
+            setCivilStatus(data.civil_status || 'Select Civil Status');
+            setPermanentAddress(data.permanent_address || '');
+            setOfficeAddress(data.office_address || '');
+            setNationality(data.nationality || '');
+            setReligion(data.religion || '');
+            setEducation(data.education || '');
+            setOccupation(data.occupation || '');
+            setMobile(data.mobile || '');
+            setTelephone(data.telephone || '');
+            setEmail(data.email || '');
+            setIdSchool(data.id_school || '');
+            setIdCompany(data.id_company || '');
+            setIdPrc(data.id_prc || '');
+            setIdDrivers(data.id_drivers || '');
+            setIdSssGsisBir(data.id_sss_gsis_bir || '');
+            setIdOthers(data.id_others || '');
+          } else {
+            console.log('No donor details found for this email');
+          }
+        } else {
+          console.log('No authenticated user found');
+        }
+      } catch (error) {
+        console.error('Authentication error:', error);
+        Alert.alert('Error', 'Failed to authenticate user.');
       }
       setLoading(false);
     };

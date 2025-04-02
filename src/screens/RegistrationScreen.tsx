@@ -7,7 +7,7 @@ import { supabase } from '../library/db_conn';
 import { useNavigation } from '@react-navigation/native';
 
 const RegistrationScreen: React.FC = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
 
   const [surname, setSurname] = useState('');
   const [firstName, setFirstName] = useState('');
@@ -38,10 +38,19 @@ const RegistrationScreen: React.FC = () => {
   const [idOthers, setIdOthers] = useState('');
 
   const validateForm = () => {
+    // Check required fields except IDs
     if (!surname || !firstName || sex === 'Select Sex' || civilStatus === 'Select Civil Status' || !birthdate || !permanentAddress || !nationality || !occupation || !mobileNo || !email || !password || !confirmPassword) {
       Alert.alert('Missing Information', 'Please fill in all required fields.');
       return false;
     }
+    
+    // Check if at least one ID field is provided
+    const hasAtLeastOneID = !!(idSchool || idCompany || idPrc || idDrivers || idSssGsisBir || idOthers);
+    if (!hasAtLeastOneID) {
+      Alert.alert('Identification Required', 'Please provide at least one form of identification (any ID of your choice).');
+      return false;
+    }
+    
     if (password !== confirmPassword) {
       Alert.alert('Password Mismatch', 'Passwords do not match.');
       return false;
@@ -65,41 +74,34 @@ const RegistrationScreen: React.FC = () => {
         return;
       }
   
-      // Extract the user ID after successful registration
-      const userId = data.user?.id;
-      if (!userId) {
-        console.log("User ID not found after registration");
-        Alert.alert('Error', 'User ID not found after registration');
-        return;
-      }
-  
-      // Insert donor details into donors_detail
+      // Insert donor details into donors_detail - using 'id' column to match the auth user
+      // Based on the table structure shown in the image
       const { error: insertError } = await supabase.from('donors_detail').insert([
         {
-          id: userId, // Link to auth user
+          id: data.user?.id, // Using the 'id' column as shown in the image
           surname,
           first_name: firstName,
-          middle_name: middleName,
-          birthdate,
-          age,
+          middle_name: middleName || null,
+          birthdate: moment(birthdate).format('YYYY-MM-DD'),
+          age: parseInt(age || '0'),
           sex,
           civil_status: civilStatus,
           permanent_address: permanentAddress,
-          office_address: officeAddress,
+          office_address: officeAddress || null,
           nationality,
           religion,
           education,
           occupation,
           mobile: mobileNo,
-          telephone: telephoneNo,
+          telephone: telephoneNo || null,
           email,
           // Add identification fields
-          id_school: idSchool,
-          id_company: idCompany,
-          id_prc: idPrc,
-          id_drivers: idDrivers,
-          id_sss_gsis_bir: idSssGsisBir,
-          id_others: idOthers,
+          id_school: idSchool || null,
+          id_company: idCompany || null,
+          id_prc: idPrc || null,
+          id_drivers: idDrivers || null,
+          id_sss_gsis_bir: idSssGsisBir || null,
+          id_others: idOthers || null
         }
       ]);
   
@@ -111,7 +113,10 @@ const RegistrationScreen: React.FC = () => {
   
       // Success Message
       Alert.alert('Success', 'Registration successful!', [
-        { text: 'OK', onPress: () => navigation.navigate('Login') },
+        { 
+          text: 'OK', 
+          onPress: () => navigation.navigate('Login')
+        },
       ]);
   
       // Clear all input fields after successful submission
@@ -141,9 +146,9 @@ const RegistrationScreen: React.FC = () => {
       setIdSssGsisBir('');
       setIdOthers('');
   
-    } catch (error) {
+    } catch (error: any) {
       console.log("Unexpected Error:", error);
-      Alert.alert('Unexpected Error', error.message);
+      Alert.alert('Unexpected Error', error?.message || 'An unknown error occurred');
     }
   };
 
@@ -156,7 +161,6 @@ const RegistrationScreen: React.FC = () => {
         <TextInput placeholder="Surname *" style={styles.input} value={surname} onChangeText={setSurname} />
         <TextInput placeholder="First Name *" style={styles.input} value={firstName} onChangeText={setFirstName} />
         <TextInput placeholder="Middle Name" style={styles.input} value={middleName} onChangeText={setMiddleName} />
-
         <Text style={styles.label}>Birthdate (MM/DD/YYYY) *</Text>
         <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.input}>
           <Text>{moment(birthdate).format('MM/DD/YYYY')}</Text>
@@ -203,7 +207,8 @@ const RegistrationScreen: React.FC = () => {
         <TextInput placeholder="Mobile No. *" style={styles.input} value={mobileNo} onChangeText={setMobileNo} />
         <TextInput placeholder="Telephone No. (Optional)" style={styles.input} value={telephoneNo} onChangeText={setTelephoneNo} />
 
-        <Text style={styles.sectionTitle}>IDENTIFICATION NUMBERS</Text>
+        <Text style={styles.sectionTitle}>IDENTIFICATION NO. (Enter any one)</Text>
+        <Text style={styles.infoText}>Please provide at least one form of identification below:</Text>
         <View style={styles.idContainer}>
           <View style={styles.idItem}>
             <Text style={styles.idLabel}>School</Text>
@@ -332,6 +337,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
     marginBottom: 5,
+  },
+  infoText: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 10,
+    fontStyle: 'italic',
   },
 });
 

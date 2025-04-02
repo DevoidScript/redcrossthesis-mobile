@@ -1,16 +1,21 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image, Alert } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Image, Alert, BackHandler } from "react-native";
 import { supabase } from "../library/db_conn"; // Ensure this is correctly set up
+import { useFocusEffect } from '@react-navigation/native';
 
 const DashboardScreen = ({ navigation }) => {
-  const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      Alert.alert("Error", "Logout failed. Try again.");
-      return;
-    }
-    navigation.replace("Login"); // Redirect to Login after logout
-  };
+  // Prevent going back to login screen with hardware back button
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        // Prevent default back behavior when on Dashboard
+        return true;
+      };
+      
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+      return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+    }, [])
+  );
 
   const handleDonateBlood = () => {
     navigation.navigate("DonorForm"); // Ensure DonorForm is defined in navigation
@@ -41,10 +46,6 @@ const DashboardScreen = ({ navigation }) => {
           resizeMode="cover"
         />
         <Text style={styles.donateText}>Donate</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={styles.logoutButtonText}>Logout</Text>
       </TouchableOpacity>
     </View>
   );
@@ -96,20 +97,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     marginLeft: 10, // Spacing between image and text
-  },
-  logoutButton: {
-    backgroundColor: "red",
-    padding: 15,
-    borderRadius: 5,
-    position: "absolute",
-    top: 50,
-    right: 20,
-  },
-  logoutButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
+  }
 });
 
 export default DashboardScreen;
