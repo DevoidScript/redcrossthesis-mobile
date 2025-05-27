@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image, Alert, BackHandler } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Image, Alert, BackHandler } from "react-native"
 import { supabase } from "../library/db_conn"; // Ensure this is correctly set up
 import { useFocusEffect } from '@react-navigation/native';
 
